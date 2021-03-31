@@ -6,7 +6,7 @@ var Cart = require('./Models/cart')
 var CartData = []
 var CartTotal = 0;
 
-// For demo purposes only. These keys should idealy be stored in .env file.
+
 var luisAppId = 'd68d9705-389f-468b-8516-c8d9b723dce7';
 var luisAPIKey = '6a89e3312da14784b0855f7f576618d3';
 var luisAPIHostName = 'first';
@@ -23,12 +23,12 @@ const LuisModelUrl =
 
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 5000, function () {
-   console.log('%s listening to %s', server.name, server.url); 
+   console.log('listening to %s', server.url); 
 });
 
 var connector = new builder.ChatConnector({
-    appId: process.env.MicrosoftAppId,
-    appPassword: process.env.MicrosoftAppPassword
+    appId: 'c85f451f-b4c2-4bf5-8872-5e779af49555',
+    appPassword: 'fLbmcu_kDrnH7KnT5U_F6M2g9-b0H2bs-1'
 });
 
 const inMemoryStorage = new builder.MemoryBotStorage();
@@ -48,7 +48,7 @@ bot.dialog('mainMenu',[(session)=>{
     session.userData.Cart=CartData
     var message = "Kindly Select an option from the Menu";
     if(session.userData.flag==false){
-        message = "Welcome to E-Kart. Kindly Select an option from the Menu!"
+        message = "Welcome to MyBot. Kindly Select an option from the Menu!"
         session.userData.flag=true;
     }
     session.send(message);
@@ -175,6 +175,80 @@ bot.dialog('searchProduct',[
     matches:'SearchProducts'
 })
 
+
+bot.dialog('compare',[
+    (session,args,next)=>{
+        if((args==undefined || args==null) && session.dialogData.productSearch!=undefined){
+            next();
+        }
+        else{
+            
+            if((args==undefined || args==null) && session.dialogData.productSearch==undefined ){
+                builder.Prompts.text(session,"Enter name of the Item you want to compare?");
+                next();
+            }
+            else if(args!=undefined){
+                var intent = args.intent;
+                var productNameEntity = builder.EntityRecognizer.findEntity(intent.entities, 'productName');
+                if(productNameEntity==undefined||productNameEntity==null){
+                    builder.Prompts.text(session,"Enter name of the Item you are looking for?");
+                }
+                else{
+                    session.dialogData.productSearch=productNameEntity.entity;
+                    next();
+                }
+    
+            }
+        }
+
+    },
+    (session,results)=>{
+        if (session.message && session.message.value) {
+
+            var prod = products[session.message.value.id];
+            session.dialogData.productSearch=undefined
+            var newItem = new Cart(CartData.length,prod.id,1,prod.price);
+            CartData.push(newItem)
+            session.userData.Cart = CartData
+            CartData.forEach((value)=>{
+                CartTotal+=parseInt(value.total);
+            })
+            session.endDialog();
+            session.beginDialog('mainMenu');
+            return; 
+        }
+        else{
+            session.dialogData.productSearch = results.response==undefined?session.dialogData.productSearch:results.response;
+            session.dialogData.productSearch = session.dialogData.productSearch.toLowerCase();
+            var data = products.filter(ele=>{
+                if(ele.title.toLowerCase().includes(session.dialogData.productSearch) || ele.tags.toLowerCase().includes(session.dialogData.productSearch) ){
+                    return true
+                }
+            })
+            if(data && data.length==0){
+                session.send('Sorry but we currently don\'t have the product you are looking for.')
+                session.endDialog();
+            }
+            else{
+                var cards = []
+                data.forEach((value)=>{
+                    cards.push(getProducts(value.id))
+                })
+                var adaptiveCardMessage = new builder.Message(session)
+                .attachmentLayout(builder.AttachmentLayout.carousel)
+                .attachments(cards);
+                session.send(adaptiveCardMessage);
+            }
+        }
+
+    }
+])
+.triggerAction({
+    matches:'CompareProducts'
+})
+
+
+
 bot.dialog('cartStatus',[
     (session)=>{
         if (session.message && session.message.value) {
@@ -208,7 +282,7 @@ bot.dialog('cartStatus',[
                 .attachmentLayout(builder.AttachmentLayout.carousel)
                 .attachments(cards);
                 session.send(adaptiveCardMessage);
-                session.send(`Cart Total: INR ${CartTotal}`);
+                session.send(`Cart Total: $ ${CartTotal}`);
             }
             
         }
@@ -218,6 +292,7 @@ bot.dialog('cartStatus',[
         session.endDialog();
     }
 ])
+
 .triggerAction({
     matches:'CartStatus'
 })
@@ -234,7 +309,7 @@ bot.dialog('checkout',[
     (session,results)=>{
         if(results.response){
             session.userData.address=results.response;
-            builder.Prompts.text(session, `Cart Total: INR ${CartTotal} \n Are you sure you wish to place the order?`);
+            builder.Prompts.text(session, `Cart Total: $ ${CartTotal} \n Are you sure you wish to place the order?`);
         }
     },
     (session,results)=>{
@@ -291,7 +366,7 @@ function getProducts(id) {
                                 },
                                 {
                                     "type": "TextBlock",
-                                    "text": `Price : Rs. ${products[id].price}`,
+                                    "text": `Price : $ ${products[id].price}`,
                                     "size": "small",
                                     "wrap": true
                                 }
@@ -366,7 +441,7 @@ function cartProducts(cart) {
                                 },
                                 {
                                     "type": "TextBlock",
-                                    "text": `Price : Rs. ${product.price}`,
+                                    "text": `Price : $ ${product.price}`,
                                     "size": "small",
                                     "wrap": true
                                 }
