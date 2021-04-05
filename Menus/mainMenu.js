@@ -5,9 +5,6 @@ var mainMenu = {
     "Search Products": {
         Description: "searchProduct"
     },
-    "Compare Products": {
-        Description: "compare"
-    },
     "Cart Status": {
         Description: "cartStatus"
     }

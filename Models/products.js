@@ -1,36 +1,36 @@
 var products = [
-  {
-      id:0,
-      category:'CLOTHING',
-      title:'Levis Jeans',
-      rating:'4.8',
-      price:16,
-      tags:'jeans jean levis Levis clothing clothings casual jeans. Jeans.',
-      pic:'https://images-na.ssl-images-amazon.com/images/I/91AsjDJXjdL._UL1500_.jpg',
-      link:'https://www.amazon.com/Levis-Regular-Fit-Jeans-Medium-Stonewash/dp/B0018QOGQ4/ref=sr_1_1_sspa?crid=2AGX64BESX6MA&dchild=1&keywords=levis+jeans+for+men&qid=1615926004&sprefix=levis+jeans%2Caps%2C191&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExUDZZNTBHWFMxMjJCJmVuY3J5cHRlZElkPUEwMDQ4MzE0MUhZT0paSEVKSFBaSCZlbmNyeXB0ZWRBZElkPUEwNzU1Njg2MjFQTFhBSjM1RlcwMiZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU='
-  },
-  {
-      id:1,
-      category:'CLOTHING',
-      title:'GAS Shirt',
-      rating:'4.9',
-      price:35,
-      tags:'shirts shirt gas GAS clothing clothings casual shirts. Shirts. ',
-      pic:'https://images-na.ssl-images-amazon.com/images/I/813X6pGSlbL._UL1500_.jpg',
-      link:'https://www.amazon.com/shirtloco-Mens-T-Shirt-Cardinal-Small/dp/B07CSL347K/ref=sr_1_1_sspa?dchild=1&keywords=gas+shirt&qid=1615926051&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExSk43REU0OUk0TlBCJmVuY3J5cHRlZElkPUEwNTk1NTgyMkFYNlpSUUkyNFVPNCZlbmNyeXB0ZWRBZElkPUEwNjc2MDk5MzVUSzg5OVRZNzgyVSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU='
-
-  },
-  {
+    {
+        id:0,
+        category:'HeadPhones',
+        title:'Bose Headphones',
+        rating:'4.8',
+        price:249.99,
+        tags:'Bose Bose-headphones Bose-Headphones Headphones headphones',
+        pic:'https://images-na.ssl-images-amazon.com/images/I/81%2BjNVOUsJL._AC_SL1500_.jpg',
+        link:'https://www.amazon.com/Bose-QuietComfort-Wireless-Headphones-Cancelling/dp/B0756CYWWD/ref=sr_1_3?crid=H28HZK55LVIL&dchild=1&keywords=bose+headphones&qid=1617654567&sprefix=bose+head%2Caps%2C185&sr=8-3'
+    },
+    {
+        id:1,
+        category:'Phones',
+        title:'Samsung Galaxy S21',
+        rating:'4.9',
+        price:949,
+        tags:'Samsung-Galaxy-S21 Samsung Galaxy S21',
+        pic:'https://images-na.ssl-images-amazon.com/images/I/61bLefD79-L._AC_SL1020_.jpg',
+        link:'https://www.amazon.com/shirtloco-Mens-T-Shirt-Cardinal-Small/dp/B07CSL347K/ref=sr_1_1_sspa?dchild=1&keywords=gas+shirt&qid=1615926051&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExSk43REU0OUk0TlBCJmVuY3J5cHRlZElkPUEwNTk1NTgyMkFYNlpSUUkyNFVPNCZlbmNyeXB0ZWRBZElkPUEwNjc2MDk5MzVUSzg5OVRZNzgyVSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU='
+  
+    },
+    {
       id:2,
-      category:'FOOTWEAR',
-      title:'Nike shoes',
-      rating:'4.5',
-      price:34,
-      tags:'nike NIKE shoes shoe running sport sports shoe. shoes. ',
-      pic:'https://images-na.ssl-images-amazon.com/images/I/71jfNM3gpbL._SL1200_.jpg',
-      link:'https://www.amazon.com/Nike-Experience-White-Cool-Grey-Reflective-Regular/dp/B00V88DL72/ref=sr_1_2_mod_primary_new?dchild=1&keywords=nike+shoes&qid=1615926076&sbo=RZvfv%2F%2FHxDF%2BO5021pAnSA%3D%3D&sr=8-2'
-
+      category:'Phones',
+      title: 'iPhone 12 black',
+      rating: '4.2',
+      price: 849.99,
+      tags:'iPhone iPhone-12 iPhone-12-Black iPhone-12-64Gb iPhone-12-128Gb',
+      pic:'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-black-select-2020?wid=940&hei=1112&fmt=png-alpha&qlt=80&.v=1604343702000',
+      link:'https://www.amazon.com/Apple-iPhone-Locked-Carrier-Subscription/dp/B08L5P2777/ref=sr_1_1_sspa?dchild=1&keywords=iphone+12+black&qid=1617292394&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzNzdWTkpKTEQxU0RCJmVuY3J5cHRlZElkPUEwNTg5NzEwM1RCNUlNQ1IxREhMRyZlbmNyeXB0ZWRBZElkPUEwODg0NTIyMlVBQlpaNkQzWEQxRCZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU=#'
+  
   }
-]
-
-module.exports = products
+  ]
+  
+  module.exports = products

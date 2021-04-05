@@ -1,8 +1,10 @@
 var restify = require('restify');
+const axios = require('axios');
 var builder = require('botbuilder');
 var mainMenu = require('./Menus/mainMenu')
 var products = require('./Models/products')
-var Cart = require('./Models/cart')
+var Cart = require('./Models/cart');
+const { request } = require('express');
 var CartData = []
 var CartTotal = 0;
 
@@ -27,8 +29,8 @@ server.listen(process.env.port || process.env.PORT || 5000, function () {
 });
 
 var connector = new builder.ChatConnector({
-    appId: 'c85f451f-b4c2-4bf5-8872-5e779af49555',
-    appPassword: 'fLbmcu_kDrnH7KnT5U_F6M2g9-b0H2bs-1'
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSFT_APP_PASSWORD
 });
 
 const inMemoryStorage = new builder.MemoryBotStorage();
@@ -130,7 +132,7 @@ bot.dialog('searchProduct',[
         }
 
     },
-    (session,results)=>{
+    async (session,results)=>{
         if (session.message && session.message.value) {
 
             var prod = products[session.message.value.id];
@@ -148,6 +150,72 @@ bot.dialog('searchProduct',[
         else{
             session.dialogData.productSearch = results.response==undefined?session.dialogData.productSearch:results.response;
             session.dialogData.productSearch = session.dialogData.productSearch.toLowerCase();
+            var bestbuyAPI1 ="https://api.bestbuy.com/v1/products((search=";
+            var bestbuyAPI2=")&(categoryPath.id=pcmcat209400050001))?apiKey=HGov0AOGQHxqAVErJjdfKjXE&format=json";
+            var bestbuy=bestbuyAPI1+session.dialogData.productSearch+bestbuyAPI2;
+            // console.log(bestbuysearch(bestbuy));
+            var bbprice=0;
+            var bbURL='';
+           
+
+            var url1 = await axios.get(bestbuy).then(function(response){
+                if(response.data.products.length==0){
+                    console.log("Enter correct items")
+                    return;
+                }
+                // console.log("sai++++++++++"+ JSON.stringify(response.data.products[0].url));
+                bbURL=JSON.stringify(response.data.products[0].url);
+                bbprice=JSON.stringify(response.data.products[0].regularPrice);
+                
+                Promise.all([url1]).then(function(values){
+                    return values
+                }).catch(function(err){
+                    console.log(err)
+                })
+            })
+            console.log("url=="+bbURL);
+            console.log("bbprice=="+bbprice);
+
+            const headers = {
+                'x-rapidapi-key': 'd81aaa8463msha2a64a4767e0e5cp1401bcjsncd8885a83f04',
+                'x-rapidapi-host': 'amazon-price1.p.rapidapi.com',
+                'useQueryString':'true'
+            }
+            var amazon1='https://amazon-price1.p.rapidapi.com/search?keywords='
+            var amazon2='&marketplace=US'
+            var amazonprice=0
+            var amazonurl=''
+            var amazon=amazon1+session.dialogData.productSearch+amazon2
+            var url2 = await axios.get(amazon,{
+                headers: headers
+              }).then(function(response){
+                console.log(response.data)
+                amazonprice=response.data[0].price
+                amazonurl=response.data[0].detailPageURL
+                Promise.all([url2]).then(function(values){
+                    return values
+                }).catch(function(err){
+                    console.log(err)
+                })
+            })
+
+
+            items=[
+                {
+                    'name':'amazon',
+                    'url':amazonurl,
+                    'price':amazonprice
+                },
+                {
+                    'name':'bestbuy',
+                    'url':bbURL,
+                    'price':bbprice
+                }
+            ]
+            
+            // bestbuy API call
+            // amazon API call 
+
             var data = products.filter(ele=>{
                 if(ele.title.toLowerCase().includes(session.dialogData.productSearch) || ele.tags.toLowerCase().includes(session.dialogData.productSearch) ){
                     return true
@@ -160,7 +228,7 @@ bot.dialog('searchProduct',[
             else{
                 var cards = []
                 data.forEach((value)=>{
-                    cards.push(getProducts(value.id))
+                    cards.push(searchProducts(value.id,items))
                 })
                 var adaptiveCardMessage = new builder.Message(session)
                 .attachmentLayout(builder.AttachmentLayout.carousel)
@@ -175,79 +243,17 @@ bot.dialog('searchProduct',[
     matches:'SearchProducts'
 })
 
-
-bot.dialog('compare',[
-    (session,args,next)=>{
-        if((args==undefined || args==null) && session.dialogData.productSearch!=undefined){
-            next();
-        }
-        else{
-            
-            if((args==undefined || args==null) && session.dialogData.productSearch==undefined ){
-                builder.Prompts.text(session,"Enter name of the Item you want to compare?");
-                next();
-            }
-            else if(args!=undefined){
-                var intent = args.intent;
-                var productNameEntity = builder.EntityRecognizer.findEntity(intent.entities, 'productName');
-                if(productNameEntity==undefined||productNameEntity==null){
-                    builder.Prompts.text(session,"Enter name of the Item you are looking for?");
-                }
-                else{
-                    session.dialogData.productSearch=productNameEntity.entity;
-                    next();
-                }
-    
-            }
-        }
-
-    },
-    (session,results)=>{
-        if (session.message && session.message.value) {
-
-            var prod = products[session.message.value.id];
-            session.dialogData.productSearch=undefined
-            var newItem = new Cart(CartData.length,prod.id,1,prod.price);
-            CartData.push(newItem)
-            session.userData.Cart = CartData
-            CartData.forEach((value)=>{
-                CartTotal+=parseInt(value.total);
-            })
-            session.endDialog();
-            session.beginDialog('mainMenu');
-            return; 
-        }
-        else{
-            session.dialogData.productSearch = results.response==undefined?session.dialogData.productSearch:results.response;
-            session.dialogData.productSearch = session.dialogData.productSearch.toLowerCase();
-            var data = products.filter(ele=>{
-                if(ele.title.toLowerCase().includes(session.dialogData.productSearch) || ele.tags.toLowerCase().includes(session.dialogData.productSearch) ){
-                    return true
-                }
-            })
-            if(data && data.length==0){
-                session.send('Sorry but we currently don\'t have the product you are looking for.')
-                session.endDialog();
-            }
-            else{
-                var cards = []
-                data.forEach((value)=>{
-                    cards.push(getProducts(value.id))
-                })
-                var adaptiveCardMessage = new builder.Message(session)
-                .attachmentLayout(builder.AttachmentLayout.carousel)
-                .attachments(cards);
-                session.send(adaptiveCardMessage);
-            }
-        }
-
-    }
-])
-.triggerAction({
-    matches:'CompareProducts'
-})
-
-
+function bestbuysearch(bestbuy){
+   return axios({
+        "method": "GET",
+        "url": bestbuy,          
+    })
+    .then((response) => {
+        return response.data.products[0]
+    }).catch((error) => {
+        return error
+    })
+}
 
 bot.dialog('cartStatus',[
     (session)=>{
@@ -369,7 +375,7 @@ function getProducts(id) {
                                     "text": `Price : $ ${products[id].price}`,
                                     "size": "small",
                                     "wrap": true
-                                }
+                                },  
                             ]
                         },
                         {
@@ -395,6 +401,7 @@ function getProducts(id) {
                             "id":id
                         }
                 },
+
                 {
                     "type": "Action.OpenUrl",
                     "title": "More Info",
@@ -404,6 +411,99 @@ function getProducts(id) {
         }
     }    
 }
+
+
+function searchProducts(id,comparision) {
+    return {
+        contentType: "application/vnd.microsoft.card.adaptive",
+        content: {
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "type": "AdaptiveCard",
+            "version": "1.0",
+            "body": [
+                {
+                    "type": "ColumnSet",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "width": 2,
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "text": products[id].category
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": products[id].title,
+                                    "weight": "bolder",
+                                    "size": "extraLarge",
+                                    "spacing": "none"
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": `${products[id].rating} ★★★☆ (93) · $$`,
+                                    "isSubtle": true,
+                                    "spacing": "none"
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": `Price : $ ${products[id].price}`,
+                                    "size": "small",
+                                    "wrap": true
+                                }, 
+                                {
+                                    "type": "TextBlock",
+                                    "text": `BestBuy Price : $ ${comparision[1].price},
+                                                           ${comparision[1].url}`,
+                                    "size": "small",
+                                    "wrap": true
+                                }, 
+                                {
+                                    "type": "TextBlock",
+                                    "text": `Amazon Price :  ${comparision[0].price},
+                                                    ${comparision[0].url}`,
+                                    "size": "small",
+                                    "wrap": true
+                                }, 
+                               
+                            ]
+                        },
+                        {
+                            "type": "Column",
+                            "width": 1,
+                            "items": [
+                                {
+                                    "type": "Image",
+                                    "url": products[id].pic,
+                                    "size": "auto"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "actions": [
+                {
+                    "type": "Action.Submit",
+                    "title": "Add to Cart",
+                        "data": { 
+                            "choice": "Submit.Feedback",
+                            "id":id
+                        }
+                },
+
+                {
+                    "type": "Action.OpenUrl",
+                    "title": "More Info",
+                    "url": products[id].link
+                },
+            ]
+            
+              
+        }
+    }    
+}
+
 
 function cartProducts(cart) {
 
